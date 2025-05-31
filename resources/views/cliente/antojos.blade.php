@@ -2,7 +2,7 @@
 
 @section('content')
     @include('cliente.navbar')
-    <!-- Modal para detalles del producto -->
+    <!-- Modal Detalles Producto -->
     <div class="modal fade" id="productoModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
@@ -25,8 +25,8 @@
         </div>
     </div>
     <div class="container mt-5 pt-5">
-        <h2 class="text-center">{{ $categoria['nombre'] ?? 'Antojos' }}</h2>
-        <p class="text-center">{{ $categoria['descripcion'] ?? '' }}</p>
+        <h2 class="text-center">{{ $categoria['nombre'] }}</h2>
+        <p class="text-center">{{ $categoria['descripcion'] }}</p>
         <div class="banner-container mt-3">
             <div class="owl-carousel">
                 <img src="https://img.freepik.com/fotos-premium/hamburguesa-lechuga-tomate-queso-encima_911201-2411.jpg" alt="Hamburguesa con lechuga y tomate">
@@ -36,24 +36,24 @@
         </div>
         <div class="list-group mt-3">
             @foreach ($productos as $producto)
-                <div class='card-desayuno menu-item hover-item'
-                    data-nombre='{{ $producto["nombre"] }}'
-                    data-descripcion='{{ $producto["descripcion"] }}'
-                    data-precio='{{ $producto["precio"] }}'
-                    data-imagen='{{ $producto["imagen_url"] }}'
-                    data-ingredientes='@json($producto["ingredientes"])'>
-                    <img src="{{ $producto['imagen_url'] }}" alt="{{ $producto['nombre'] }}">
-                    <div class="info">
-                        <strong>{{ $producto['nombre'] }}</strong>
-                        <span class="precio">Q{{ number_format($producto['precio'], 2) }}</span>
-                    </div>
+            <div class="list-group-item list-group-item-action menu-item hover-item"
+                data-nombre="{{ $producto['nombre'] }}"
+                data-descripcion="{{ $producto['descripcion'] }}"
+                data-precio="{{ $producto['precio'] }}"
+                data-imagen="{{ $producto['imagen_url'] }}"
+                data-ingredientes="{{ isset($producto['ingredientes']) ? implode(', ', $producto['ingredientes']) : '' }}">
+                <img src="{{ $producto['imagen_url'] }}" alt="{{ $producto['nombre'] }}">
+                <div>
+                    <strong>{{ $producto['nombre'] }}</strong><br>
+                    Q{{ number_format($producto['precio'], 2) }}
                 </div>
+            </div>
             @endforeach
         </div>
     </div>
     <div class="card-redirect">
         <h4>¿Terminaste tu pedido?</h4>
-        <button class="btn-animado" id="btn-regresar-menu">
+        <button class="btn-animado" onclick="window.location.href='{{ route('cliente.menu') }}'">
             Regresar al Menú
         </button>
     </div>
@@ -65,14 +65,13 @@
 
 @push('scripts')
 <script>
-window.productoActual = null;
-window.mostrarDetallesProducto = function(nombre, descripcion, precio, imagen, ingredientes) {
+function mostrarDetallesProducto(nombre, descripcion, precio, imagen, ingredientes) {
     window.productoActual = {
-        nombre,
-        descripcion,
-        precio,
-        imagen,
-        ingredientes: ingredientes ? ingredientes.split(',') : []
+        nombre: nombre,
+        descripcion: descripcion,
+        precio: precio,
+        imagen: imagen,
+        ingredientes: ingredientes ? ingredientes.split(', ') : []
     };
     document.getElementById('modalNombre').textContent = nombre;
     document.getElementById('modalDescripcion').textContent = descripcion;
@@ -99,33 +98,26 @@ window.mostrarDetallesProducto = function(nombre, descripcion, precio, imagen, i
         bootstrap.Modal.getInstance(document.getElementById('productoModal')).hide();
     };
     new bootstrap.Modal(document.getElementById('productoModal')).show();
-};
-document.addEventListener('DOMContentLoaded', function() {
-    if (window.jQuery && window.$ && $(".owl-carousel").owlCarousel) {
-        $(".owl-carousel").owlCarousel({
-            loop: true,
-            margin: 10,
-            nav: false,
-            items: 1,
-            autoplay: true
-        });
-    }
-    document.querySelectorAll('.menu-item').forEach(function(item) {
-        item.addEventListener('click', function() {
-            const nombre = this.getAttribute('data-nombre');
-            const descripcion = this.getAttribute('data-descripcion');
-            const precio = parseFloat(this.getAttribute('data-precio'));
-            const imagen = this.getAttribute('data-imagen');
-            const ingredientes = this.getAttribute('data-ingredientes');
-            window.mostrarDetallesProducto(nombre, descripcion, precio, imagen, ingredientes);
-        });
+}
+
+// Delegación de eventos para los productos
+$(document).ready(function(){
+    $(".owl-carousel").owlCarousel({
+        loop: true,
+        margin: 10,
+        nav: false,
+        items: 1,
+        autoplay: true
     });
-    var btnRegresar = document.getElementById('btn-regresar-menu');
-    if (btnRegresar) {
-        btnRegresar.onclick = function() {
-            window.location.href = "{{ route('cliente.menu') }}";
-        };
-    }
+    $('.menu-item').on('click', function() {
+        mostrarDetallesProducto(
+            $(this).data('nombre'),
+            $(this).data('descripcion'),
+            parseFloat($(this).data('precio')),
+            $(this).data('imagen'),
+            $(this).data('ingredientes')
+        );
+    });
 });
 </script>
 @endpush 
