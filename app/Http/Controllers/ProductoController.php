@@ -87,9 +87,17 @@ class ProductoController extends Controller
      */
     public function gestion(Request $request)
     {
-        $categorias = \App\Models\Categoria::all();
+        $categorias = \App\Models\Categoria::whereIn('nombre', [
+            'Desayunos',
+            'Platos Principales',
+            'Antojos',
+            'Entradas',
+            'Bebidas',
+        ])->get();
         $ingredientes = \App\Models\Ingrediente::all();
-        $productos = \App\Models\Producto::with(['categoria', 'ingredientes'])->get();
+        $productos = \App\Models\Producto::with(['categoria', 'ingredientes'])
+            ->whereIn('categoria_id', $categorias->pluck('id'))
+            ->get();
         $producto_editar = null;
         $ingredientes_producto = [];
         if ($request->has('edit')) {
