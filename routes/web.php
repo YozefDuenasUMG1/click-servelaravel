@@ -22,7 +22,7 @@ use App\Http\Controllers\UsuarioController;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('login');
 });
 
 Route::prefix('cliente')->name('cliente.')->group(function () {
